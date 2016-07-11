@@ -8,10 +8,10 @@ object Main extends App {
   val s2 = union(singletonSet(6), singletonSet(4))
   val s3 = union(s1,s2)
 
-      //printSet(s3)
+  printSet(s3)
   //println(forall(s3,x => x < 0))
 
-  val new1 = map(s3, x => x*x)
+  val new1 = map(s3, x => x+1)
 
   printSet(new1)
 

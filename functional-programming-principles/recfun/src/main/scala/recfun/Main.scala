@@ -28,9 +28,9 @@ object Main {
     def byStep(xs: List[Char], acc: Int): Boolean = {
       xs match {
         case Nil =>
-          if (acc != 0) false else true
+          acc == 0
         case first :: rest =>
-          if (acc < 0) return false
+          if (acc < 0) false else
           if (first == '(') byStep(rest, acc + 1) else if (first == ')') byStep(rest, acc - 1) else byStep(rest, acc)
       }
     }
