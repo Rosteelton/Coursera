@@ -165,11 +165,9 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
     if (p(elem)) {
       val newAcc = acc.incl(elem)
-      left.filterAcc(p, newAcc)
-      right.filterAcc(p, newAcc)
+      left.filterAcc(p, right.filterAcc(p, newAcc))
     } else {
-      left.filterAcc(p, acc)
-      right.filterAcc(p, acc)
+      left.filterAcc(p, right.filterAcc(p, acc))
     }
   }
 
@@ -207,14 +205,14 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     * and be implemented in the subclasses?
     */
   override def union(that: TweetSet): TweetSet = {
-    if (that.contains(this.elem)) {
-      left.union(that)
-      right.union(that)
+
+   if (that.contains(this.elem)) {
+      left.union(right.union(that))
     } else {
       val newThat = that.incl(this.elem)
-      left.union(newThat)
-      right.union(newThat)
+      left.union(right.union(newThat))
     }
+
   }
 
 
@@ -240,9 +238,13 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     } else {
       val l = left.mostRetweeted
       val r = right.mostRetweeted
-      if (l.retweets > r.retweets) l else r
+
+      if (l.retweets >= elem.retweets && l.retweets >= r.retweets) l
+      else if (r.retweets >= elem.retweets && r.retweets >= l.retweets) r else elem
+
     }
   }
+
 
 
   /**
@@ -295,28 +297,27 @@ object GoogleVsApple {
   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
-  lazy val googleTweets: TweetSet = ???
-  lazy val appleTweets: TweetSet = ???
+  lazy val googleTweets: TweetSet = allTweets.filter(tweet => google.exists(string => tweet.text.contains(string)))
+
+
+  lazy val appleTweets: TweetSet = allTweets.filter(tweet => apple.exists(string => tweet.text.contains(string)))
 
   /**
     * A list of all tweets mentioning a keyword from either apple or google,
     * sorted by the number of retweets.
     */
-  lazy val trending: TweetList = ???
+  lazy val trending: TweetList = {
+    val unionSet = appleTweets.union(googleTweets)
+    unionSet.descendingByRetweet
+  }
 }
 
 object Main extends App {
   // Print the trending tweets
-  //GoogleVsApple.trending foreach println
 
-  val set1 = new Empty
-  val set2 = set1.incl(new Tweet("a", "a body", 20))
-  val set3 = set2.incl(new Tweet("b", "b body", 21))
-  val c = new Tweet("c", "c body", 7)
-  val d = new Tweet("d", "d body", 9)
-  val set4c = set3.incl(c)
-  val set4d = set3.incl(d)
-  val set5 = set4c.incl(d)
+   GoogleVsApple.trending foreach println
+
+
 
 
 }
