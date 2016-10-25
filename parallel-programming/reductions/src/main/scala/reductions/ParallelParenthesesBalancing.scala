@@ -20,6 +20,8 @@ object ParallelParenthesesBalancingRunner {
   def main(args: Array[String]): Unit = {
     val length = 100000000
     val chars = new Array[Char](length)
+    chars(0) = ')'
+    chars(1) = '('
     val threshold = 10000
     val seqtime = standardConfig measure {
       seqResult = ParallelParenthesesBalancing.balance(chars)
@@ -41,25 +43,43 @@ object ParallelParenthesesBalancing {
   /** Returns `true` iff the parentheses in the input `chars` are balanced.
    */
   def balance(chars: Array[Char]): Boolean = {
-    ???
+    var i = 0
+    var result = 0
+    while(i< chars.length) {
+      if (chars(i) == '(') result += 1
+      if (chars(i) == ')') result -= 1
+      if (result < 0) return false
+        i += 1
+    }
+    if (result == 0) true else false
   }
 
   /** Returns `true` iff the parentheses in the input `chars` are balanced.
    */
   def parBalance(chars: Array[Char], threshold: Int): Boolean = {
 
-    def traverse(idx: Int, until: Int, arg1: Int, arg2: Int) /*: ???*/ = {
-      ???
+    def traverse(idx: Int, until: Int, acc: Int, index: Int): Int = {
+      var i = idx
+      var result = 0
+      while(i < until) {
+        if (chars(i) == '(') result += 1
+        if (chars(i) == ')') result -= 1
+        if (result < 0) return Int.MaxValue
+        i += 1
+      }
+      result
     }
 
-    def reduce(from: Int, until: Int) /*: ???*/ = {
-      ???
+    def reduce(from: Int, until: Int): Int = {
+      if (until - from <= threshold) traverse(from, until, 0, 0)
+      else {
+        val m = (from + until)/2
+        val res = parallel(reduce(from, m), reduce(m, until))
+        res._1 + res._2
+      }
     }
 
-    reduce(0, chars.length) == ???
+    reduce(0, chars.length) == 0
   }
-
-  // For those who want more:
-  // Prove that your reduction operator is associative!
 
 }
