@@ -75,6 +75,7 @@ object ParallelParenthesesBalancing {
       else {
         val m = (from + until)/2
         val res = parallel(reduce(from, m), reduce(m, until))
+        if (res._1 == Int.MaxValue || res._2 == Int.MaxValue) Int.MaxValue
         res._1 + res._2
       }
     }

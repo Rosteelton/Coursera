@@ -13,7 +13,7 @@ class LineOfSightSuite extends FunSuite {
   import LineOfSight._
   test("lineOfSight should correctly handle an array of size 4") {
     val output = new Array[Float](4)
-    lineOfSight(Array[Float](0f, 1f, 8f, 9f), output)
+    parLineOfSight(Array[Float](0f, 1f, 8f, 9f), output, 4)
     assert(output.toList == List(0f, 1f, 4f, 4f))
   }
 

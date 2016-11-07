@@ -17,8 +17,8 @@ object ParallelCountChangeRunner {
   ) withWarmer (new Warmer.Default)
 
   def main(args: Array[String]): Unit = {
-    val amount = 250
-    val coins = List(1, 2, 5, 10, 20, 50)
+    val amount = 1
+    val coins = List(1)
     val seqtime = standardConfig measure {
       seqResult = ParallelCountChange.countChange(amount, coins)
     }
@@ -59,7 +59,7 @@ object ParallelCountChange {
     */
   def parCountChange(money: Int, coins: List[Int], threshold: Threshold): Int = {
     if (threshold(money, coins)) countChange(money, coins)
-    else if (coins.isEmpty || money <= 0) 0
+    else if (coins.isEmpty || money < 0) 0
     else if (money == 0) 1
     else {
         val res = parallel(parCountChange(money - coins.head, coins, threshold), parCountChange(money, coins.tail, threshold))
