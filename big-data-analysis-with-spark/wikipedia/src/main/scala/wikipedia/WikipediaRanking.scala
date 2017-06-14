@@ -48,9 +48,9 @@ object WikipediaRanking {
    * to the Wikipedia pages in which it occurs.
    */
   def makeIndex(langs: List[String], rdd: RDD[WikipediaArticle]): RDD[(String, Iterable[WikipediaArticle])] = {
-    rdd.flatMap(article => langs.map(lang => (lang, article))).groupByKey().map {
-      case (lang, articles) => (lang, articles.filter(_.mentionsLanguage(lang)))
-    }
+    rdd
+      .flatMap(article => langs.filter(lang => article.mentionsLanguage(lang)).map(lang => (lang, article)))
+      .groupByKey()
   }
 
   /* (2) Compute the language ranking again, but now using the inverted index. Can you notice
@@ -60,7 +60,11 @@ object WikipediaRanking {
    *   several seconds.
    */
   def rankLangsUsingIndex(index: RDD[(String, Iterable[WikipediaArticle])]): List[(String, Int)] =
-    index.mapValues(_.toSeq.length).collect().toList
+    index
+      .mapValues(_.size)
+      .sortBy(_._2, ascending = false)
+      .collect()
+      .toList
 
   /* (3) Use `reduceByKey` so that the computation of the index and the ranking are combined.
    *     Can you notice an improvement in performance compared to measuring *both* the computation of the index
@@ -69,10 +73,12 @@ object WikipediaRanking {
    *   Note: this operation is long-running. It can potentially run for
    *   several seconds.
    */
-  def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = {
-
-  }
-
+  def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] =
+    rdd.flatMap(article => langs.filter(article.mentionsLanguage)
+      .map(lang => (lang, 1)))
+      .reduceByKey(_ + _)
+      .sortBy(_._2, ascending = false)
+      .collect().toList
 
   def main(args: Array[String]) {
 
